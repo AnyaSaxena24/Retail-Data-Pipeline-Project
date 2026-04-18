@@ -1,0 +1,13 @@
+Airflow DAG Explanation
+
+A Directed Acyclic Graph (DAG) is used to define the workflow of the data pipeline.
+
+In this project, the DAG includes four tasks:
+1. Data Ingestion
+2. Data Transformation
+3. Data Loading
+4. Data Analysis
+
+These tasks are executed sequentially, ensuring proper data flow.
+
+Airflow helps automate and schedule the pipeline efficiently.

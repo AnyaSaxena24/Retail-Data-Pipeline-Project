@@ -1,0 +1,12 @@
+ETL Pipeline Explanation
+
+Extract:
+Data is extracted from a CSV file containing sales transactions including order details, product, city, quantity, and price.
+
+Transform:
+The data is cleaned by removing missing values. A new column 'total_sales' is created by multiplying quantity and price. Basic validation checks are applied.
+
+Load:
+The processed data is loaded into a SQLite database. A star schema is implemented with fact and dimension tables for efficient analysis.
+
+This pipeline ensures structured, clean, and query-ready data for business insights.
