@@ -1,74 +1,39 @@
-<<<<<<< HEAD
-import pandas as pd
 import sqlite3
 
-# Load processed data
-df = pd.read_csv('../output/processed_sales_data.csv')
-
+# Connect to database
 conn = sqlite3.connect('../sql/retail.db')
 cursor = conn.cursor()
 
-with open('../sql/star_schema.sql', 'r') as f:
-    cursor.executescript(f.read())
+# Drop tables if exist (clean rerun)
+cursor.execute("DROP TABLE IF EXISTS sales_fact")
+cursor.execute("DROP TABLE IF EXISTS product_dim")
+cursor.execute("DROP TABLE IF EXISTS city_dim")
+cursor.execute("DROP TABLE IF EXISTS date_dim")
 
-products = df[['product', 'category']].drop_duplicates()
-products.to_sql('product_dim', conn, if_exists='append', index=False)
+# Create dimension tables
+cursor.execute("""
+CREATE TABLE product_dim AS
+SELECT DISTINCT product, category FROM sales;
+""")
 
-cities = df[['city']].drop_duplicates()
-cities.to_sql('city_dim', conn, if_exists='append', index=False)
+cursor.execute("""
+CREATE TABLE city_dim AS
+SELECT DISTINCT city FROM sales;
+""")
 
-dates = df[['order_date']].drop_duplicates()
-dates.to_sql('date_dim', conn, if_exists='append', index=False)
+cursor.execute("""
+CREATE TABLE date_dim AS
+SELECT DISTINCT order_date FROM sales;
+""")
 
-product_dim = pd.read_sql('SELECT * FROM product_dim', conn)
-city_dim = pd.read_sql('SELECT * FROM city_dim', conn)
-date_dim = pd.read_sql('SELECT * FROM date_dim', conn)
+# Create fact table
+cursor.execute("""
+CREATE TABLE sales_fact AS
+SELECT order_id, order_date, city, product, total_sales
+FROM sales;
+""")
 
-df = df.merge(product_dim, on=['product', 'category'])
-df = df.merge(city_dim, on='city')
-df = df.merge(date_dim, on='order_date')
-
-fact_df = df[['order_id', 'date_id', 'product_id', 'city_id', 'quantity', 'total_sales']]
-
-fact_df.to_sql('sales_fact', conn, if_exists='append', index=False)
-
-print("Star schema created successfully!")
-
-=======
-import pandas as pd
-import sqlite3
-
-# Load processed data
-df = pd.read_csv('../output/processed_sales_data.csv')
-
-conn = sqlite3.connect('../sql/retail.db')
-cursor = conn.cursor()
-
-with open('../sql/star_schema.sql', 'r') as f:
-    cursor.executescript(f.read())
-
-products = df[['product', 'category']].drop_duplicates()
-products.to_sql('product_dim', conn, if_exists='append', index=False)
-
-cities = df[['city']].drop_duplicates()
-cities.to_sql('city_dim', conn, if_exists='append', index=False)
-
-dates = df[['order_date']].drop_duplicates()
-dates.to_sql('date_dim', conn, if_exists='append', index=False)
-
-product_dim = pd.read_sql('SELECT * FROM product_dim', conn)
-city_dim = pd.read_sql('SELECT * FROM city_dim', conn)
-date_dim = pd.read_sql('SELECT * FROM date_dim', conn)
-
-df = df.merge(product_dim, on=['product', 'category'])
-df = df.merge(city_dim, on='city')
-df = df.merge(date_dim, on='order_date')
-
-fact_df = df[['order_id', 'date_id', 'product_id', 'city_id', 'quantity', 'total_sales']]
-
-fact_df.to_sql('sales_fact', conn, if_exists='append', index=False)
-
-print("Star schema created successfully!")
-
->>>>>>> 0ba55a4fda3736f5faf58da868efe97116708868
+conn.commit()
 conn.close()
+
+print("Star schema created successfully!")
