@@ -1,0 +1,9 @@
+ETL vs ELT
+
+ETL (Extract, Transform, Load):
+Data is first transformed and then loaded into the database. This approach is suitable for structured processing and was used in this project.
+
+ELT (Extract, Load, Transform):
+Data is first loaded into the system and then transformed using database processing. This is used in big data systems.
+
+In this project, ETL approach was used for better control and simplicity.
